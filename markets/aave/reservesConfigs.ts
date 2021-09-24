@@ -225,7 +225,7 @@ export const strategyWBTC: IReserveParams = {
   borrowingEnabled: true,
   stableBorrowRateEnabled: true,
   reserveDecimals: '8',
-  aTokenImpl: eContractid.AToken,
+  aTokenImpl: eContractid.APoRToken,
   reserveFactor: '2000'
 };
 

@@ -20,9 +20,11 @@ import {
 import { rawInsertContractAddressInDb } from './contracts-helpers';
 import { BigNumber, BigNumberish, Signer } from 'ethers';
 import {
+  deployAporToken,
   deployDefaultReserveInterestRateStrategy,
   deployDelegationAwareAToken,
   deployDelegationAwareATokenImpl,
+  deployGenericAPoRTokenImpl,
   deployGenericAToken,
   deployGenericATokenImpl,
   deployGenericStableDebtToken,
@@ -41,6 +43,8 @@ export const chooseATokenDeployment = (id: eContractid) => {
       return deployGenericAToken;
     case eContractid.DelegationAwareAToken:
       return deployDelegationAwareAToken;
+    case eContractid.APoRToken:
+      return deployAporToken;
     default:
       throw Error(`Missing aToken deployment script for: ${id}`);
   }
@@ -105,6 +109,7 @@ export const initReservesByHelper = async (
   let aTokenType: Record<string, string> = {};
   let delegationAwareATokenImplementationAddress = '';
   let aTokenImplementationAddress = '';
+  let aporTokenImplementationAddress = '';
   let stableDebtTokenImplementationAddress = '';
   let variableDebtTokenImplementationAddress = '';
 
@@ -127,6 +132,10 @@ export const initReservesByHelper = async (
   aTokenImplementationAddress = aTokenImplementation.address;
   rawInsertContractAddressInDb(`aTokenImpl`, aTokenImplementationAddress);
 
+  const aporTokenImplementation = await deployGenericAPoRTokenImpl(verify);
+  aporTokenImplementationAddress = aporTokenImplementation.address;
+  rawInsertContractAddressInDb(`aTokenImpl`, aporTokenImplementationAddress);
+
   const delegatedAwareReserves = Object.entries(reservesParams).filter(
     ([_, { aTokenImpl }]) => aTokenImpl === eContractid.DelegationAwareAToken
   ) as [string, IReserveParams][];
@@ -142,7 +151,9 @@ export const initReservesByHelper = async (
 
   const reserves = Object.entries(reservesParams).filter(
     ([_, { aTokenImpl }]) =>
-      aTokenImpl === eContractid.DelegationAwareAToken || aTokenImpl === eContractid.AToken
+      aTokenImpl === eContractid.DelegationAwareAToken ||
+      aTokenImpl === eContractid.AToken ||
+      aTokenImpl === eContractid.APoRToken
   ) as [string, IReserveParams][];
 
   for (let [symbol, params] of reserves) {
@@ -180,10 +191,16 @@ export const initReservesByHelper = async (
     strategyAddressPerAsset[symbol] = strategyAddresses[strategy.name];
     console.log('Strategy address for asset %s: %s', symbol, strategyAddressPerAsset[symbol]);
 
-    if (aTokenImpl === eContractid.AToken) {
-      aTokenType[symbol] = 'generic';
-    } else if (aTokenImpl === eContractid.DelegationAwareAToken) {
-      aTokenType[symbol] = 'delegation aware';
+    switch (aTokenImpl) {
+      case eContractid.AToken:
+        aTokenType[symbol] = 'generic';
+        break;
+      case eContractid.DelegationAwareAToken:
+        aTokenType[symbol] = 'delegation aware';
+        break;
+      case eContractid.APoRToken:
+        aTokenType[symbol] = 'proof-of-reserves';
+        break;
     }
 
     reserveInitDecimals.push(reserveDecimals);
@@ -193,10 +210,17 @@ export const initReservesByHelper = async (
 
   for (let i = 0; i < reserveSymbols.length; i++) {
     let aTokenToUse: string;
-    if (aTokenType[reserveSymbols[i]] === 'generic') {
-      aTokenToUse = aTokenImplementationAddress;
-    } else {
-      aTokenToUse = delegationAwareATokenImplementationAddress;
+    switch (aTokenType[reserveSymbols[i]]) {
+      case 'generic':
+        aTokenToUse = aTokenImplementationAddress;
+        break;
+      case 'proof-of-reserves':
+        aTokenToUse = aporTokenImplementationAddress;
+        break;
+      default:
+      case 'delegation aware':
+        aTokenToUse = delegationAwareATokenImplementationAddress;
+        break;
     }
 
     initInputParams.push({
