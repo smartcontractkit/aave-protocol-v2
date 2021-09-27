@@ -231,46 +231,73 @@ makeSuite(
         expect(await aWbtc.balanceOf(user.address)).to.equal(balanceBefore);
       });
 
-      describe('Set feed', () => {
-        it('should only be callable by poolAdmin', async () => {
-          const { aWbtc, users } = testEnv;
-          const regularUser = users[1];
-          await expect(
-            aWbtc.connect(regularUser.signer)._setFeed(mockV3Aggregator.address)
-          ).to.be.revertedWith(ProtocolErrors.CALLER_NOT_POOL_ADMIN);
-        });
+      it('should revert if feed returns an invalid answer', async () => {
+        const { wbtc, aWbtc, users, pool } = testEnv;
+        const user = users[1];
 
-        it('should unset feed if called by pool admin', async () => {
-          const { aWbtc, users } = testEnv;
-          await aWbtc._setFeed(ZERO_ADDRESS);
-          expect(await aWbtc.feed()).to.equal(ZERO_ADDRESS);
-        });
+        // Mint some fake WBTC
+        const amountToDeposit = await convertToCurrencyDecimals(wbtc.address, '10');
+        await wbtc.connect(user.signer).mint(amountToDeposit);
+        await wbtc.connect(user.signer).approve(pool.address, amountToDeposit);
+
+        // Update feed with invalid answer
+        await mockV3Aggregator.updateAnswer(0);
+
+        // Make sure feed and heartbeat values are set
+        await aWbtc._setFeed(mockV3Aggregator.address);
+        expect(await aWbtc.feed()).to.equal(mockV3Aggregator.address);
+        const heartbeatSeconds = 24 * 60 * 60;
+        await aWbtc._setHeartbeat(heartbeatSeconds); // 1 day, in seconds
+        expect(await aWbtc.heartbeat()).to.equal(heartbeatSeconds);
+
+        // Deposit WBTC - the aToken will call the feed before minting to check PoR
+        const balanceBefore = await aWbtc.balanceOf(user.address);
+        await expect(
+          pool.connect(user.signer).deposit(wbtc.address, amountToDeposit, user.address, '0')
+        ).to.be.revertedWith(ProtocolErrors.AT_POR_INVALID_ANSWER);
+        expect(await aWbtc.balanceOf(user.address)).to.equal(balanceBefore);
+      });
+    });
+
+    describe('Set feed', () => {
+      it('should only be callable by poolAdmin', async () => {
+        const { aWbtc, users } = testEnv;
+        const regularUser = users[1];
+        await expect(
+          aWbtc.connect(regularUser.signer)._setFeed(mockV3Aggregator.address)
+        ).to.be.revertedWith(ProtocolErrors.CALLER_NOT_POOL_ADMIN);
       });
 
-      describe('Set heartbeat', () => {
-        it('should only be callable by poolAdmin', async () => {
-          const { aWbtc, users } = testEnv;
-          const regularUser = users[1];
-          const oneDaySeconds = 24 * 60 * 60;
-          await expect(
-            aWbtc.connect(regularUser.signer)._setHeartbeat(oneDaySeconds)
-          ).to.be.revertedWith(ProtocolErrors.CALLER_NOT_POOL_ADMIN);
-        });
+      it('should unset feed if called by pool admin', async () => {
+        const { aWbtc, users } = testEnv;
+        await aWbtc._setFeed(ZERO_ADDRESS);
+        expect(await aWbtc.feed()).to.equal(ZERO_ADDRESS);
+      });
+    });
 
-        it('should revert if newHeartbeat > MAX_AGE', async () => {
-          const { aWbtc, users } = testEnv;
-          const regularUser = users[1];
-          const eightDaySeconds = 8 * 24 * 60 * 60;
-          await expect(aWbtc._setHeartbeat(eightDaySeconds)).to.be.revertedWith(
-            ProtocolErrors.AT_POR_HEARTBEAT_GREATER_THAN_MAX_AGE
-          );
-        });
+    describe('Set heartbeat', () => {
+      it('should only be callable by poolAdmin', async () => {
+        const { aWbtc, users } = testEnv;
+        const regularUser = users[1];
+        const oneDaySeconds = 24 * 60 * 60;
+        await expect(
+          aWbtc.connect(regularUser.signer)._setHeartbeat(oneDaySeconds)
+        ).to.be.revertedWith(ProtocolErrors.CALLER_NOT_POOL_ADMIN);
+      });
 
-        it('should unset heartbeat if called by pool admin', async () => {
-          const { aWbtc } = testEnv;
-          await aWbtc._setHeartbeat(0);
-          expect(await aWbtc.heartbeat()).to.equal(0);
-        });
+      it('should revert if newHeartbeat > MAX_AGE', async () => {
+        const { aWbtc, users } = testEnv;
+        const regularUser = users[1];
+        const eightDaySeconds = 8 * 24 * 60 * 60;
+        await expect(aWbtc._setHeartbeat(eightDaySeconds)).to.be.revertedWith(
+          ProtocolErrors.AT_POR_HEARTBEAT_GREATER_THAN_MAX_AGE
+        );
+      });
+
+      it('should unset heartbeat if called by pool admin', async () => {
+        const { aWbtc } = testEnv;
+        await aWbtc._setHeartbeat(0);
+        expect(await aWbtc.heartbeat()).to.equal(0);
       });
     });
   },
