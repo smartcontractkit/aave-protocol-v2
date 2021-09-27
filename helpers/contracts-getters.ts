@@ -75,13 +75,13 @@ export const getPriceOracle = async (address?: tEthereumAddress) =>
 
 export const getAToken = async (address?: tEthereumAddress) =>
   await ATokenFactory.connect(
-    address || (await getDb().get(`${eContractid.APoRToken}.${DRE.network.name}`).value()).address,
+    address || (await getDb().get(`${eContractid.AToken}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 
 export const getAPoRToken = async (address?: tEthereumAddress) =>
-  await ATokenFactory.connect(
-    address || (await getDb().get(`${eContractid.AToken}.${DRE.network.name}`).value()).address,
+  await APoRTokenFactory.connect(
+    address || (await getDb().get(`${eContractid.APoRToken}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 
