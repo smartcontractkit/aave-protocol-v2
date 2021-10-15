@@ -140,11 +140,32 @@ makeSuite('APoRToken: Mint with proof-of-reserves check', (testEnv: TestEnv) => 
       );
     });
 
+    it('should mint successfully when underlying supply == proof-of-reserves', async () => {
+      // Re-deploy aggregator with WBTC reserves == WBTC underlying supply
+      const currentWbtcSupply = await wbtc.totalSupply();
+      mockV3Aggregator = await deployMockV3Aggregator('8', currentWbtcSupply.toString());
+
+      // Make sure feed and heartbeat values are set
+      await aWbtc._setFeed(mockV3Aggregator.address);
+      expect(await aWbtc.feed()).to.equal(mockV3Aggregator.address);
+      await aWbtc._setHeartbeat(ONE_DAY_SECONDS);
+      expect(await aWbtc.heartbeat()).to.equal(ONE_DAY_SECONDS);
+
+      // Deposit WBTC - the aToken will call the feed before minting to check PoR
+      const balanceBefore = await aWbtc.balanceOf(regularUser.address);
+      await pool
+        .connect(regularUser.signer)
+        .deposit(wbtc.address, amountToDeposit, regularUser.address, '0');
+      expect(await aWbtc.balanceOf(regularUser.address)).to.equal(
+        balanceBefore.add(amountToDeposit)
+      );
+    });
+
     it('should revert if underlying supply > proof-of-reserves', async () => {
       // Re-deploy aggregator with fewer WBTC in reserves
       const currentWbtcSupply = await wbtc.totalSupply();
       const notEnoughReserves = currentWbtcSupply.sub('1');
-      mockV3Aggregator = await deployMockV3Aggregator('18', notEnoughReserves.toString());
+      mockV3Aggregator = await deployMockV3Aggregator('8', notEnoughReserves.toString());
 
       // Make sure feed and heartbeat values are set
       await aWbtc._setFeed(mockV3Aggregator.address);
@@ -163,8 +184,7 @@ makeSuite('APoRToken: Mint with proof-of-reserves check', (testEnv: TestEnv) => 
     });
 
     it('should revert if the feed is not updated within the heartbeat', async () => {
-      // Re-deploy aggregator with fewer decimals
-      mockV3Aggregator = await deployMockV3Aggregator('18', WBTC_FEED_INITIAL_ANSWER);
+      mockV3Aggregator = await deployMockV3Aggregator('8', WBTC_FEED_INITIAL_ANSWER);
 
       // Make sure feed and heartbeat values are set
       await aWbtc._setFeed(mockV3Aggregator.address);
