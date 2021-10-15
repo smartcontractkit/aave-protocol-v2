@@ -58,12 +58,12 @@ makeSuite('APoRToken: Mint with proof-of-reserves check', (testEnv: TestEnv) => 
       );
     });
 
-    it('should mint successfully when feed is set, but heartbeat is unset', async () => {
+    it('should mint successfully when feed is set, but heartbeat is unset (defaulting to MAX_AGE)', async () => {
       // Make sure feed and heartbeat values are what we're testing for
       await aWbtc._setFeed(mockV3Aggregator.address);
       expect(await aWbtc.feed()).to.equal(mockV3Aggregator.address);
       await aWbtc._setHeartbeat(0);
-      expect(await aWbtc.heartbeat()).to.equal(0);
+      expect(await aWbtc.heartbeat()).to.equal(await aWbtc.MAX_AGE());
 
       // Deposit WBTC - the aToken will call the feed before minting to check PoR
       const balanceBefore = await aWbtc.balanceOf(regularUser.address);
@@ -232,9 +232,9 @@ makeSuite('APoRToken: Mint with proof-of-reserves check', (testEnv: TestEnv) => 
       );
     });
 
-    it('should unset heartbeat if called by pool admin', async () => {
+    it('should set heartbeat to MAX_AGE by default if called by pool admin with 0', async () => {
       await aWbtc._setHeartbeat(0);
-      expect(await aWbtc.heartbeat()).to.equal(0);
+      expect(await aWbtc.heartbeat()).to.equal(await aWbtc.MAX_AGE());
     });
   });
 });

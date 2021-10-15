@@ -30,6 +30,14 @@ contract APoRToken is AToken, IAPoRToken {
   }
 
   /**
+   * @dev This constructor only serves to set a default heartbeat.
+   *  Don't forget to use `initialize(...)` as you would with a regular AToken.
+   */
+  constructor() public {
+    heartbeat = MAX_AGE;
+  }
+
+  /**
    * @notice Overriden mint function that checks the specified proof-of-reserves feed to
    * ensure that the supply of the underlying assets is not greater than the reported
    * reserves.
@@ -48,7 +56,7 @@ contract APoRToken is AToken, IAPoRToken {
     require(answer > 0, Errors.AT_POR_INVALID_ANSWER);
 
     // Check the answer is fresh enough (i.e., within the specified heartbeat)
-    uint256 heartbeat_ = heartbeat == 0 ? MAX_AGE : heartbeat;
+    uint256 heartbeat_ = heartbeat;
     uint256 oldestAllowed = block.timestamp.sub(heartbeat_, Errors.AT_POR_INVALID_TIMESTAMP);
     require(updatedAt >= oldestAllowed, Errors.AT_POR_ANSWER_TOO_OLD);
 
@@ -76,8 +84,8 @@ contract APoRToken is AToken, IAPoRToken {
    * @param newFeed Address of the new feed
    */
   function _setFeed(address newFeed) external override onlyPoolAdmin returns (uint256) {
-    emit NewFeed(feed, newFeed);
     feed = newFeed;
+    emit NewFeed(feed, newFeed);
   }
 
   /**
@@ -88,7 +96,7 @@ contract APoRToken is AToken, IAPoRToken {
   function _setHeartbeat(uint256 newHeartbeat) external override onlyPoolAdmin returns (uint256) {
     require(newHeartbeat <= MAX_AGE, Errors.AT_POR_HEARTBEAT_GREATER_THAN_MAX_AGE);
 
+    heartbeat = newHeartbeat == 0 ? MAX_AGE : newHeartbeat;
     emit NewHeartbeat(heartbeat, newHeartbeat);
-    heartbeat = newHeartbeat;
   }
 }
