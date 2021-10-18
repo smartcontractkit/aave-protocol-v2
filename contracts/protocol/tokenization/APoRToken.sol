@@ -56,8 +56,7 @@ contract APoRToken is AToken, IAPoRToken {
     require(answer > 0, Errors.AT_POR_INVALID_ANSWER);
 
     // Check the answer is fresh enough (i.e., within the specified heartbeat)
-    uint256 heartbeat_ = heartbeat;
-    uint256 oldestAllowed = block.timestamp.sub(heartbeat_, Errors.AT_POR_INVALID_TIMESTAMP);
+    uint256 oldestAllowed = block.timestamp.sub(heartbeat, Errors.AT_POR_INVALID_TIMESTAMP);
     require(updatedAt >= oldestAllowed, Errors.AT_POR_ANSWER_TOO_OLD);
 
     // Get required info about underlying/reserves supply & decimals
