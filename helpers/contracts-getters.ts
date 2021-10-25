@@ -33,6 +33,7 @@ import {
   WETH9MockedFactory,
   WETHGatewayFactory,
   FlashLiquidationAdapterFactory,
+  APoRTokenFactory,
 } from '../types';
 import { IERC20DetailedFactory } from '../types/IERC20DetailedFactory';
 import { getEthersSigners, MockTokenMap } from './contracts-helpers';
@@ -75,6 +76,12 @@ export const getPriceOracle = async (address?: tEthereumAddress) =>
 export const getAToken = async (address?: tEthereumAddress) =>
   await ATokenFactory.connect(
     address || (await getDb().get(`${eContractid.AToken}.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
+
+export const getAPoRToken = async (address?: tEthereumAddress) =>
+  await APoRTokenFactory.connect(
+    address || (await getDb().get(`${eContractid.APoRToken}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 

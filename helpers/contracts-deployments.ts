@@ -33,6 +33,7 @@ import {
   MintableDelegationERC20Factory,
   MintableERC20Factory,
   MockAggregatorFactory,
+  MockV3AggregatorFactory,
   MockATokenFactory,
   MockFlashLoanReceiverFactory,
   MockParaSwapAugustusFactory,
@@ -52,6 +53,7 @@ import {
   WETH9MockedFactory,
   WETHGatewayFactory,
   FlashLiquidationAdapterFactory,
+  APoRTokenFactory,
 } from '../types';
 import {
   withSaveAndVerify,
@@ -222,6 +224,18 @@ export const deployMockAggregator = async (price: tStringTokenSmallUnits, verify
     await new MockAggregatorFactory(await getFirstSigner()).deploy(price),
     eContractid.MockAggregator,
     [price],
+    verify
+  );
+
+export const deployMockV3Aggregator = async (
+  decimals: tStringTokenSmallUnits,
+  initialAnswer: tStringTokenSmallUnits,
+  verify?: boolean
+) =>
+  withSaveAndVerify(
+    await new MockV3AggregatorFactory(await getFirstSigner()).deploy(decimals, initialAnswer),
+    eContractid.MockAggregator,
+    [decimals, initialAnswer],
     verify
   );
 
@@ -406,6 +420,14 @@ export const deployGenericATokenImpl = async (verify: boolean) =>
   withSaveAndVerify(
     await new ATokenFactory(await getFirstSigner()).deploy(),
     eContractid.AToken,
+    [],
+    verify
+  );
+
+export const deployGenericAPoRTokenImpl = async (verify: boolean) =>
+  withSaveAndVerify(
+    await new APoRTokenFactory(await getFirstSigner()).deploy(),
+    eContractid.APoRToken,
     [],
     verify
   );
@@ -670,3 +692,35 @@ export const deployParaSwapLiquiditySwapAdapter = async (
     args,
     verify
   );
+
+export const deployAporToken = async (
+  [pool, underlyingAssetAddress, treasuryAddress, incentivesController, name, symbol]: [
+    tEthereumAddress,
+    tEthereumAddress,
+    tEthereumAddress,
+    tEthereumAddress,
+    string,
+    string
+  ],
+  verify: boolean
+) => {
+  const instance = await withSaveAndVerify(
+    await new APoRTokenFactory(await getFirstSigner()).deploy(),
+    eContractid.APoRToken,
+    [],
+    verify
+  );
+
+  await instance.initialize(
+    pool,
+    treasuryAddress,
+    underlyingAssetAddress,
+    incentivesController,
+    '18',
+    name,
+    symbol,
+    '0x10'
+  );
+
+  return instance;
+};

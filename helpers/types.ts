@@ -90,6 +90,7 @@ export enum eContractid {
   MockParaSwapAugustus = 'MockParaSwapAugustus',
   MockParaSwapAugustusRegistry = 'MockParaSwapAugustusRegistry',
   ParaSwapLiquiditySwapAdapter = 'ParaSwapLiquiditySwapAdapter',
+  APoRToken = 'APoRToken',
 }
 
 /*
@@ -181,6 +182,18 @@ export enum ProtocolErrors {
   RC_INVALID_DECIMALS = '70',
   RC_INVALID_RESERVE_FACTOR = '71',
   LPAPR_INVALID_ADDRESSES_PROVIDER_ID = '72',
+  VL_INCONSISTENT_FLASHLOAN_PARAMS = '73',
+  LP_INCONSISTENT_PARAMS_LENGTH = '74',
+  UL_INVALID_INDEX = '77',
+  LP_NOT_CONTRACT = '78',
+  SDT_STABLE_DEBT_OVERFLOW = '79',
+  SDT_BURN_EXCEEDS_BALANCE = '80',
+  AT_POR_INVALID_ANSWER = '81',
+  AT_POR_INVALID_TIMESTAMP = '82',
+  AT_POR_ANSWER_TOO_OLD = '83',
+  AT_POR_INVALID_DECIMALS = '84',
+  AT_POR_UNDERLYING_GREATER_THAN_RESERVES = '85',
+  AT_POR_HEARTBEAT_GREATER_THAN_MAX_AGE = '86',
 
   // old
 

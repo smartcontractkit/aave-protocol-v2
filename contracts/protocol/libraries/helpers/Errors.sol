@@ -103,6 +103,12 @@ library Errors {
   string public constant LP_NOT_CONTRACT = '78';
   string public constant SDT_STABLE_DEBT_OVERFLOW = '79';
   string public constant SDT_BURN_EXCEEDS_BALANCE = '80';
+  string public constant AT_POR_INVALID_ANSWER = '81';
+  string public constant AT_POR_INVALID_TIMESTAMP = '82';
+  string public constant AT_POR_ANSWER_TOO_OLD = '83';
+  string public constant AT_POR_INVALID_DECIMALS = '84';
+  string public constant AT_POR_UNDERLYING_GREATER_THAN_RESERVES = '85';
+  string public constant AT_POR_HEARTBEAT_GREATER_THAN_MAX_AGE = '86';
 
   enum CollateralManagerErrors {
     NO_ERROR,
