@@ -83,8 +83,8 @@ contract APoRToken is AToken, IAPoRToken {
    * @param newFeed Address of the new feed
    */
   function _setFeed(address newFeed) external override onlyPoolAdmin returns (uint256) {
-    feed = newFeed;
     emit NewFeed(feed, newFeed);
+    feed = newFeed;
   }
 
   /**
@@ -95,7 +95,7 @@ contract APoRToken is AToken, IAPoRToken {
   function _setHeartbeat(uint256 newHeartbeat) external override onlyPoolAdmin returns (uint256) {
     require(newHeartbeat <= MAX_AGE, Errors.AT_POR_HEARTBEAT_GREATER_THAN_MAX_AGE);
 
-    heartbeat = newHeartbeat == 0 ? MAX_AGE : newHeartbeat;
     emit NewHeartbeat(heartbeat, newHeartbeat);
+    heartbeat = newHeartbeat == 0 ? MAX_AGE : newHeartbeat;
   }
 }
