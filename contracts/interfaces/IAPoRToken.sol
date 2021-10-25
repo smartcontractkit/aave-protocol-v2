@@ -16,7 +16,7 @@ interface IAPoRToken is IAToken {
 
   /*** Admin Functions ***/
 
-  function _setFeed(address newFeed) external returns (uint256);
+  function setFeed(address newFeed) external returns (uint256);
 
-  function _setHeartbeat(uint256 newHeartbeat) external returns (uint256);
+  function setHeartbeat(uint256 newHeartbeat) external returns (uint256);
 }

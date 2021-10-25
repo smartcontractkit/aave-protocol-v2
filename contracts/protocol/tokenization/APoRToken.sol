@@ -82,7 +82,7 @@ contract APoRToken is AToken, IAPoRToken {
    * @dev Admin function to set a new feed
    * @param newFeed Address of the new feed
    */
-  function _setFeed(address newFeed) external override onlyPoolAdmin returns (uint256) {
+  function setFeed(address newFeed) external override onlyPoolAdmin returns (uint256) {
     emit NewFeed(feed, newFeed);
     feed = newFeed;
   }
@@ -92,7 +92,7 @@ contract APoRToken is AToken, IAPoRToken {
    * @dev Admin function to set the heartbeat
    * @param newHeartbeat Value of the age of the latest update from the feed
    */
-  function _setHeartbeat(uint256 newHeartbeat) external override onlyPoolAdmin returns (uint256) {
+  function setHeartbeat(uint256 newHeartbeat) external override onlyPoolAdmin returns (uint256) {
     require(newHeartbeat <= MAX_AGE, Errors.AT_POR_HEARTBEAT_GREATER_THAN_MAX_AGE);
 
     emit NewHeartbeat(heartbeat, newHeartbeat);

@@ -60,9 +60,9 @@ makeSuite('APoRToken: Mint with proof-of-reserves check', (testEnv: TestEnv) => 
 
     it('should mint successfully when feed is set, but heartbeat is unset (defaulting to MAX_AGE)', async () => {
       // Make sure feed and heartbeat values are what we're testing for
-      await aWbtc._setFeed(mockV3Aggregator.address);
+      await aWbtc.setFeed(mockV3Aggregator.address);
       expect(await aWbtc.feed()).to.equal(mockV3Aggregator.address);
-      await aWbtc._setHeartbeat(0);
+      await aWbtc.setHeartbeat(0);
       expect(await aWbtc.heartbeat()).to.equal(await aWbtc.MAX_AGE());
 
       // Deposit WBTC - the aToken will call the feed before minting to check PoR
@@ -77,9 +77,9 @@ makeSuite('APoRToken: Mint with proof-of-reserves check', (testEnv: TestEnv) => 
 
     it('should mint successfully when both feed and heartbeat are set', async () => {
       // Make sure feed and heartbeat values are what we're testing for
-      await aWbtc._setFeed(mockV3Aggregator.address);
+      await aWbtc.setFeed(mockV3Aggregator.address);
       expect(await aWbtc.feed()).to.equal(mockV3Aggregator.address);
-      await aWbtc._setHeartbeat(ONE_DAY_SECONDS);
+      await aWbtc.setHeartbeat(ONE_DAY_SECONDS);
       expect(await aWbtc.heartbeat()).to.equal(ONE_DAY_SECONDS);
 
       // Deposit WBTC - the aToken will call the feed before minting to check PoR
@@ -101,9 +101,9 @@ makeSuite('APoRToken: Mint with proof-of-reserves check', (testEnv: TestEnv) => 
       );
 
       // Make sure feed and heartbeat values are set
-      await aWbtc._setFeed(mockV3Aggregator.address);
+      await aWbtc.setFeed(mockV3Aggregator.address);
       expect(await aWbtc.feed()).to.equal(mockV3Aggregator.address);
-      await aWbtc._setHeartbeat(ONE_DAY_SECONDS);
+      await aWbtc.setHeartbeat(ONE_DAY_SECONDS);
       expect(await aWbtc.heartbeat()).to.equal(ONE_DAY_SECONDS);
 
       // Deposit WBTC - the aToken will call the feed before minting to check PoR
@@ -125,9 +125,9 @@ makeSuite('APoRToken: Mint with proof-of-reserves check', (testEnv: TestEnv) => 
       );
 
       // Make sure feed and heartbeat values are set
-      await aWbtc._setFeed(mockV3Aggregator.address);
+      await aWbtc.setFeed(mockV3Aggregator.address);
       expect(await aWbtc.feed()).to.equal(mockV3Aggregator.address);
-      await aWbtc._setHeartbeat(ONE_DAY_SECONDS);
+      await aWbtc.setHeartbeat(ONE_DAY_SECONDS);
       expect(await aWbtc.heartbeat()).to.equal(ONE_DAY_SECONDS);
 
       // Deposit WBTC - the aToken will call the feed before minting to check PoR
@@ -146,9 +146,9 @@ makeSuite('APoRToken: Mint with proof-of-reserves check', (testEnv: TestEnv) => 
       mockV3Aggregator = await deployMockV3Aggregator('8', currentWbtcSupply.toString());
 
       // Make sure feed and heartbeat values are set
-      await aWbtc._setFeed(mockV3Aggregator.address);
+      await aWbtc.setFeed(mockV3Aggregator.address);
       expect(await aWbtc.feed()).to.equal(mockV3Aggregator.address);
-      await aWbtc._setHeartbeat(ONE_DAY_SECONDS);
+      await aWbtc.setHeartbeat(ONE_DAY_SECONDS);
       expect(await aWbtc.heartbeat()).to.equal(ONE_DAY_SECONDS);
 
       // Deposit WBTC - the aToken will call the feed before minting to check PoR
@@ -168,9 +168,9 @@ makeSuite('APoRToken: Mint with proof-of-reserves check', (testEnv: TestEnv) => 
       mockV3Aggregator = await deployMockV3Aggregator('8', notEnoughReserves.toString());
 
       // Make sure feed and heartbeat values are set
-      await aWbtc._setFeed(mockV3Aggregator.address);
+      await aWbtc.setFeed(mockV3Aggregator.address);
       expect(await aWbtc.feed()).to.equal(mockV3Aggregator.address);
-      await aWbtc._setHeartbeat(ONE_DAY_SECONDS);
+      await aWbtc.setHeartbeat(ONE_DAY_SECONDS);
       expect(await aWbtc.heartbeat()).to.equal(ONE_DAY_SECONDS);
 
       // Deposit WBTC - the aToken will call the feed before minting to check PoR
@@ -187,9 +187,9 @@ makeSuite('APoRToken: Mint with proof-of-reserves check', (testEnv: TestEnv) => 
       mockV3Aggregator = await deployMockV3Aggregator('8', WBTC_FEED_INITIAL_ANSWER);
 
       // Make sure feed and heartbeat values are set
-      await aWbtc._setFeed(mockV3Aggregator.address);
+      await aWbtc.setFeed(mockV3Aggregator.address);
       expect(await aWbtc.feed()).to.equal(mockV3Aggregator.address);
-      await aWbtc._setHeartbeat(ONE_DAY_SECONDS);
+      await aWbtc.setHeartbeat(ONE_DAY_SECONDS);
       expect(await aWbtc.heartbeat()).to.equal(ONE_DAY_SECONDS);
 
       // Heartbeat is set to 1 day, so fast-forward 2 days
@@ -210,9 +210,9 @@ makeSuite('APoRToken: Mint with proof-of-reserves check', (testEnv: TestEnv) => 
       await mockV3Aggregator.updateAnswer(0);
 
       // Make sure feed and heartbeat values are set
-      await aWbtc._setFeed(mockV3Aggregator.address);
+      await aWbtc.setFeed(mockV3Aggregator.address);
       expect(await aWbtc.feed()).to.equal(mockV3Aggregator.address);
-      await aWbtc._setHeartbeat(ONE_DAY_SECONDS); // 1 day, in seconds
+      await aWbtc.setHeartbeat(ONE_DAY_SECONDS); // 1 day, in seconds
       expect(await aWbtc.heartbeat()).to.equal(ONE_DAY_SECONDS);
 
       // Deposit WBTC - the aToken will call the feed before minting to check PoR
@@ -229,12 +229,12 @@ makeSuite('APoRToken: Mint with proof-of-reserves check', (testEnv: TestEnv) => 
   describe('Set feed', () => {
     it('should only be callable by poolAdmin', async () => {
       await expect(
-        aWbtc.connect(regularUser.signer)._setFeed(mockV3Aggregator.address)
+        aWbtc.connect(regularUser.signer).setFeed(mockV3Aggregator.address)
       ).to.be.revertedWith(ProtocolErrors.CALLER_NOT_POOL_ADMIN);
     });
 
     it('should unset feed if called by pool admin', async () => {
-      await aWbtc._setFeed(ZERO_ADDRESS);
+      await aWbtc.setFeed(ZERO_ADDRESS);
       expect(await aWbtc.feed()).to.equal(ZERO_ADDRESS);
     });
   });
@@ -242,18 +242,18 @@ makeSuite('APoRToken: Mint with proof-of-reserves check', (testEnv: TestEnv) => 
   describe('Set heartbeat', () => {
     it('should only be callable by poolAdmin', async () => {
       await expect(
-        aWbtc.connect(regularUser.signer)._setHeartbeat(ONE_DAY_SECONDS)
+        aWbtc.connect(regularUser.signer).setHeartbeat(ONE_DAY_SECONDS)
       ).to.be.revertedWith(ProtocolErrors.CALLER_NOT_POOL_ADMIN);
     });
 
     it('should revert if newHeartbeat > MAX_AGE', async () => {
-      await expect(aWbtc._setHeartbeat(8 * ONE_DAY_SECONDS)).to.be.revertedWith(
+      await expect(aWbtc.setHeartbeat(8 * ONE_DAY_SECONDS)).to.be.revertedWith(
         ProtocolErrors.AT_POR_HEARTBEAT_GREATER_THAN_MAX_AGE
       );
     });
 
     it('should set heartbeat to MAX_AGE by default if called by pool admin with 0', async () => {
-      await aWbtc._setHeartbeat(0);
+      await aWbtc.setHeartbeat(0);
       expect(await aWbtc.heartbeat()).to.equal(await aWbtc.MAX_AGE());
     });
   });
